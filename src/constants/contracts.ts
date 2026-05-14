@@ -1,0 +1,56 @@
+export const NFT_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+export const MARKETPLACE_CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+
+export const NFT_ABI = [
+  "event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId)",
+  "event ApprovalForAll(address indexed owner, address indexed operator, bool approved)",
+  "event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId)",
+  "event MetadataUpdate(uint256 _tokenId)",
+  "event NFTMinted(uint256 indexed tokenId, address indexed creator, string tokenURI)",
+  "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
+  "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
+  "function approve(address to, uint256 tokenId)",
+  "function balanceOf(address owner) view returns (uint256)",
+  "function creators(uint256) view returns (address)",
+  "function getApproved(uint256 tokenId) view returns (address)",
+  "function getRoyaltyInfo(uint256 tokenId, uint256 salePrice) view returns (address creator, uint256 royaltyAmount)",
+  "function isApprovedForAll(address owner, address operator) view returns (bool)",
+  "function mint(string tokenURI) payable returns (uint256)",
+  "function mintFee() view returns (uint256)",
+  "function name() view returns (string)",
+  "function owner() view returns (address)",
+  "function ownerOf(uint256 tokenId) view returns (address)",
+  "function renounceOwnership()",
+  "function royaltyPercent() view returns (uint256)",
+  "function safeTransferFrom(address from, address to, uint256 tokenId)",
+  "function safeTransferFrom(address from, address to, uint256 tokenId, bytes data)",
+  "function setApprovalForAll(address operator, bool approved)",
+  "function setMintFee(uint256 fee)",
+  "function supportsInterface(bytes4 interfaceId) view returns (bool)",
+  "function symbol() view returns (string)",
+  "function tokenURI(uint256 tokenId) view returns (string)",
+  "function totalSupply() view returns (uint256)",
+  "function transferFrom(address from, address to, uint256 tokenId)",
+  "function transferOwnership(address newOwner)"
+] as const;
+
+export const MARKETPLACE_ABI = [
+  "constructor(address _feeRecipient)",
+  "error ReentrancyGuardReentrantCall()",
+  "event AuctionCreated(uint256 indexed auctionId, uint256 indexed tokenId, uint256 endTime)",
+  "event AuctionFinalized(uint256 indexed auctionId, address indexed winner, uint256 amount)",
+  "event BidPlaced(uint256 indexed auctionId, address indexed bidder, uint256 amount)",
+  "event Listed(uint256 indexed listingId, address indexed seller, uint256 tokenId, uint256 price)",
+  "event ListingCancelled(uint256 indexed listingId)",
+  "event Sold(uint256 indexed listingId, address indexed buyer, uint256 price)",
+  "function auctions(uint256) view returns (address seller, address nftContract, uint256 tokenId, uint256 startPrice, uint256 highestBid, address highestBidder, uint256 endTime, bool finalized)",
+  "function buyNFT(uint256 listingId) payable",
+  "function cancelListing(uint256 listingId)",
+  "function createAuction(address nftContract, uint256 tokenId, uint256 startPrice, uint256 durationSeconds)",
+  "function feeRecipient() view returns (address)",
+  "function finalizeAuction(uint256 auctionId)",
+  "function listNFT(address nftContract, uint256 tokenId, uint256 price)",
+  "function listings(uint256) view returns (address seller, address nftContract, uint256 tokenId, uint256 price, bool active)",
+  "function placeBid(uint256 auctionId) payable",
+  "function platformFeePercent() view returns (uint256)"
+] as const;
