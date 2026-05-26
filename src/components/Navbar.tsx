@@ -20,7 +20,21 @@ export function Navbar() {
   
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
+  const [isSysLoggedIn, setIsSysLoggedIn] = useState<boolean>(false) // Quản lý trạng thái Token hệ thống
   const menuRef = useRef<HTMLDivElement>(null)
+
+  // Kiểm tra trạng thái đăng nhập hệ thống Web2 (Token)
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken')
+    setIsSysLoggedIn(!!token)
+  }, [])
+
+  // Hàm xử lý Đăng xuất tài khoản hệ thống
+  const handleSysLogout = () => {
+    localStorage.removeItem('accessToken')
+    setIsSysLoggedIn(false)
+    window.location.href = '/' // Refresh về trang chủ để cập nhật lại giao diện khóa/mở
+  }
 
   // Đóng menu khi click ra ngoài
   useEffect(() => {
@@ -76,13 +90,21 @@ export function Navbar() {
 
       {/* Nav Links & Wallet */}
       <div className="flex items-center gap-4">
-        <div className="hidden items-center gap-6 text-sm font-semibold md:flex mr-4 text-gray-300">
+          <div className="hidden items-center gap-6 text-sm font-semibold md:flex mr-4 text-gray-300">
           <Link href="/nft" className="hover:text-white transition-colors relative group">
             Drops
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
           </Link>
-          <Link href="/nft" className="hover:text-white transition-colors relative group">
-            Stats
+          <Link href="/auction" className="hover:text-white transition-colors relative group">
+            Auctions
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
+          </Link>
+          <Link href="/transactions" className="hover:text-white transition-colors relative group">
+            Transactions
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
+          </Link>
+          <Link href="/profile" className="hover:text-white transition-colors relative group">
+            Profile
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
           </Link>
           <Link href="/nft/create" className="hover:text-white transition-colors relative group">
@@ -114,7 +136,7 @@ export function Navbar() {
                 <ChevronDown className={cn("h-4 w-4 text-gray-400 transition-transform", isMenuOpen && "rotate-180")} />
               </button>
 
-              {/* Dropdown Menu */}
+              {/* Dropdown Menu Wallet */}
               {isMenuOpen && (
                 <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-white/10 bg-[#0d1217] p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="p-3 border-b border-white/5 mb-2">
@@ -140,6 +162,11 @@ export function Navbar() {
                       <ExternalLink className="h-4 w-4" />
                       Xem trên Explorer
                     </a>
+
+                    <Link href="/profile" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-white/5 transition-colors">
+                      <User className="h-4 w-4" />
+                      Hồ sơ của tôi
+                    </Link>
                     
                     <div className="h-px bg-white/5 my-1" />
                     
@@ -148,7 +175,7 @@ export function Navbar() {
                       className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                     >
                       <LogOut className="h-4 w-4" />
-                      Ngắt kết nối
+                      Ngắt kết nối ví
                     </button>
                   </div>
                 </div>
@@ -175,13 +202,24 @@ export function Navbar() {
           
           <div className="h-8 w-px bg-white/10 mx-1 hidden lg:block" />
           
+          {/* Nút Giỏ Hàng Gốc */}
           <button className="hidden h-11 w-11 items-center justify-center rounded-xl bg-white/5 border border-white/10 transition-all hover:bg-white/10 lg:flex relative group">
             <ShoppingCart className="h-5 w-5 text-gray-300 group-hover:text-white transition-colors" />
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-blue-600 text-[10px] font-bold flex items-center justify-center shadow-lg">0</span>
           </button>
+
+          {/* NÚT ĐĂNG XUẤT HỆ THỐNG: Xếp ngay sau Giỏ hàng để không bị đè đè lên UI */}
+          {isSysLoggedIn && (
+            <button 
+              onClick={handleSysLogout}
+              className="hidden lg:flex h-11 items-center gap-2 rounded-xl bg-red-600/10 border border-red-500/20 px-4 text-sm font-bold text-red-400 transition-all hover:bg-red-600 hover:text-white hover:border-transparent active:scale-95"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Đăng xuất</span>
+            </button>
+          )}
         </div>
       </div>
     </nav>
   )
 }
-

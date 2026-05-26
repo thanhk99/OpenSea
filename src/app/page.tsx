@@ -1,8 +1,10 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Navbar } from '@/components/Navbar'
 import { NFTCard } from '@/components/NFTCard'
-import { LayoutGrid, Filter, ArrowUpDown } from 'lucide-react'
+import { LayoutGrid, Filter, ArrowUpDown, Lock } from 'lucide-react'
 
 // Dữ liệu mẫu giả lập
 const MOCK_NFTS = [
@@ -15,8 +17,34 @@ const MOCK_NFTS = [
 ]
 
 export default function Home() {
+  const router = useRouter()
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(true)
+
+  useEffect(() => {
+    // Check trạng thái đăng nhập từ localStorage
+    const token = localStorage.getItem('accessToken')
+    setIsLoggedIn(!!token)
+    setLoading(false)
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken')
+    setIsLoggedIn(false)
+    router.refresh()
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#04111d] text-white">
+        <p className="text-lg font-semibold animate-pulse">Đang tải dữ liệu hệ thống...</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-[#04111d] text-white">
+      {/* Trả Navbar về vị trí tự nhiên, không chèn ép tuyệt đối */}
       <Navbar />
 
       <main className="flex-1">
@@ -35,23 +63,72 @@ export default function Home() {
               </span>
             </h1>
             <p className="mb-10 max-w-2xl text-lg text-gray-400 md:text-xl">
-              OpenSea is the world&apos;s first and largest web3 marketplace for NFTs and crypto collectibles. 
+              OpenSea is the world&apos;s first and largest web3 marketplace for NFTs and crypto collectibles.
               Built on Hardhat Local Network.
             </p>
-            
-            <div className="flex flex-wrap gap-4">
-              <button className="rounded-xl bg-blue-600 px-8 py-4 text-sm font-bold transition-all hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(37,99,235,0.4)]">
-                Explore Marketplace
-              </button>
-              <button className="rounded-xl bg-white/10 px-8 py-4 text-sm font-bold backdrop-blur-md transition-all hover:bg-white/20">
-                Create NFT
-              </button>
-            </div>
+
+            {/* ĐIỀU KIỆN HIỂN THỊ NÚT BẤM TẠI HERO SECTION */}
+            {isLoggedIn ? (
+              // Kịch bản: ĐÃ ĐĂNG NHẬP -> Hiện nút Explore và Create bản gốc của bạn
+              <div className="flex flex-wrap gap-4">
+                <button className="rounded-xl bg-blue-600 px-8 py-4 text-sm font-bold transition-all hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(37,99,235,0.4)]">
+                  Explore Marketplace
+                </button>
+                <button
+                  onClick={() => router.push('/nft/create')}
+                  className="rounded-xl bg-white/10 px-8 py-4 text-sm font-bold backdrop-blur-md transition-all hover:bg-white/20"
+                >
+                  Create NFT
+                </button>
+              </div>
+            ) : (
+              // Kịch bản: CHƯA ĐĂNG NHẬP -> Hiện 2 nút Đăng Nhập & Đăng Ký nổi bật
+              <div className="inline-flex flex-col sm:flex-row gap-4 p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-lg shadow-2xl">
+                <div className="flex flex-col justify-center pr-4">
+                  <p className="text-sm font-bold text-blue-400 uppercase tracking-wider">Trải nghiệm an toàn</p>
+                  <p className="text-xs text-gray-400">Đăng nhập để mở khóa giao dịch bản quyền</p>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => router.push('/login')}
+                    className="rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold transition-all hover:bg-blue-500 active:scale-95"
+                  >
+                    Đăng Nhập
+                  </button>
+                  <button
+                    onClick={() => router.push('/register')}
+                    className="rounded-xl bg-white/10 px-6 py-3.5 text-sm font-bold border border-white/10 transition-all hover:bg-white/20 active:scale-95"
+                  >
+                    Đăng Ký Tài Khoản
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
         {/* Marketplace Section */}
-        <section className="mx-auto max-w-7xl px-4 py-12 md:px-8">
+        <section className="relative mx-auto max-w-7xl px-4 py-12 md:px-8">
+
+          {/* HIỆU ỨNG KHÓA MÀN HÌNH NẾU CHƯA ĐĂNG NHẬP */}
+          {!isLoggedIn && (
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#04111d]/60 backdrop-blur-md transition-all duration-500 rounded-2xl">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/30 text-blue-400 mb-4 animate-bounce">
+                <Lock className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-bold mb-1">Nội dung đã bị khóa bảo mật</h3>
+              <p className="text-sm text-gray-400 mb-6 max-w-sm text-center">
+                Bạn cần đăng nhập hệ thống để xem danh sách và thực hiện mua bán các sản phẩm nghệ thuật kỹ thuật số.
+              </p>
+              <button
+                onClick={() => router.push('/login')}
+                className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold shadow-lg hover:bg-blue-500 transition-all"
+              >
+                Đăng Nhập Ngay
+              </button>
+            </div>
+          )}
+
           {/* Controls */}
           <div className="mb-8 flex flex-col items-center justify-between gap-4 border-b border-white/5 pb-8 sm:flex-row">
             <div className="flex items-center gap-4">
@@ -77,7 +154,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Grid */}
+          {/* Grid hiển thị danh sách NFT thẻ */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {MOCK_NFTS.map((nft) => (
               <NFTCard key={nft.id} {...nft} />

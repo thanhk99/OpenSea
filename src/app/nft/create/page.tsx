@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import apiClient from '@/config/axios'
+import { useState, useEffect } from 'react'
 import { Navbar } from '@/components/Navbar'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { NFT_CONTRACT_ADDRESS, NFT_ABI } from '@/config/contracts'
@@ -18,6 +19,27 @@ export default function CreateNFT() {
     description: '',
     imageUrl: ''
   })
+
+  useEffect(() => {
+    const saveNFT = async () => {
+      if (!isSuccess || !hash) return
+
+      try {
+        await apiClient.post('/api/nfts', {
+          name: formData.name,
+          description: formData.description,
+          imageUrl: formData.imageUrl,
+          txHash: hash
+        })
+
+        console.log('Đã lưu NFT vào database')
+      } catch (err) {
+        console.error('Lỗi lưu database:', err)
+      }
+    }
+
+    saveNFT()
+  }, [isSuccess])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,7 +77,7 @@ export default function CreateNFT() {
                 <Link href="/" className="rounded-xl bg-white/10 px-6 py-3 font-bold hover:bg-white/20 transition-colors">
                   Về trang chủ
                 </Link>
-                <button 
+                <button
                   onClick={() => window.location.reload()}
                   className="rounded-xl bg-blue-600 px-6 py-3 font-bold hover:bg-blue-500 transition-colors"
                 >
@@ -123,7 +145,7 @@ export default function CreateNFT() {
                       <span className="text-gray-400">Phí Mint (Gas + Platform)</span>
                       <span className="font-bold">0.01 ETH</span>
                     </div>
-                    
+
                     <button
                       type="submit"
                       disabled={isPending || isConfirming}
@@ -138,7 +160,7 @@ export default function CreateNFT() {
                         'Mint NFT'
                       )}
                     </button>
-                    
+
                     {error && (
                       <p className="mt-4 text-center text-sm text-red-400">
                         Lỗi: {error.message.includes('insufficient funds') ? 'Không đủ số dư ETH' : 'Giao dịch bị từ chối'}
