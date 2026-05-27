@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-// 1. Tạo instance Axios kết nối tới Spring Boot
+// 1. Tạo instance Axios. Sử dụng env `NEXT_PUBLIC_API_BASE_URL` nếu được cấu hình
+//    - Nếu để rỗng, axios gọi các route relative (ví dụ `/api/...`) cùng origin
+//    - Đặt `NEXT_PUBLIC_API_BASE_URL` khi muốn gọi backend bên ngoài
 const apiClient = axios.create({
-    // Dùng baseURL tương đối để gọi đến các route Next.js (ví dụ: /api/...) trên cùng origin
-    // Nếu bạn muốn gọi backend khác, thay bằng process.env.NEXT_PUBLIC_API_BASE_URL
-    baseURL: '',
+    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || '',
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',

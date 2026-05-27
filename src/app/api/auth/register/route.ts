@@ -1,5 +1,5 @@
 import { proxyRequest } from '@/lib/proxy'
 
 export async function POST(req: Request) {
-  return proxyRequest(req, '/api/auth/login-password')
+  return proxyRequest(req, '/api/auth/register')
 }
