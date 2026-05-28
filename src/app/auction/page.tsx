@@ -12,10 +12,14 @@ export default function AuctionPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await apiClient.get('/api/auctions')
+        const res = await apiClient.get('/api/auctions')
+
+        const data = res?.data ?? res
+
         setItems(Array.isArray(data) ? data : [])
       } catch (err) {
         console.error('Không tải được auctions:', err)
+        setItems([]) // tránh undefined UI
       } finally {
         setLoading(false)
       }
@@ -29,25 +33,55 @@ export default function AuctionPage() {
       <Navbar />
 
       <main className="flex-1 py-12 px-4 md:px-8">
-        <div className="mx-auto max-w-5xl">
-          <h1 className="mb-8 text-4xl font-black tracking-tight">Marketplace — Auctions</h1>
+        <div className="mx-auto max-w-6xl">
 
+          {/* TITLE */}
+          <h1 className="mb-8 text-4xl font-black tracking-tight">
+            Marketplace — Auctions
+          </h1>
+
+          {/* LOADING */}
           {loading ? (
-            <p className="text-gray-400">Đang tải...</p>
-          ) : items.length === 0 ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center">
-              <p className="text-gray-400">Chưa có phiên đấu giá nào.</p>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-[320px] rounded-2xl bg-white/5 animate-pulse"
+                />
+              ))}
             </div>
+          ) : items.length === 0 ? (
+
+            /* EMPTY STATE */
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center">
+              <p className="text-lg font-bold text-white mb-2">
+                No Auctions Found
+              </p>
+              <p className="text-gray-400">
+                There are currently no active auctions
+              </p>
+            </div>
+
           ) : (
+
+            /* GRID */
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((it) => (
-                <AuctionCard key={it.id} auction={it} onBidSuccess={() => {
-                  // reload simple
-                  setItems((prev) => prev.map(p => p.id === it.id ? { ...p, ...it } : p))
-                }} />
+                <AuctionCard
+                  key={it.id}
+                  auction={it}
+                  onBidSuccess={(updated) => {
+                    setItems((prev) =>
+                      prev.map((p) =>
+                        p.id === updated.id ? updated : p
+                      )
+                    )
+                  }}
+                />
               ))}
             </div>
           )}
+
         </div>
       </main>
     </div>

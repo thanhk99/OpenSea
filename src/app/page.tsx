@@ -1,173 +1,269 @@
-'use client'
+"use client"
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Navbar } from '@/components/Navbar'
-import { NFTCard } from '@/components/NFTCard'
-import { LayoutGrid, Filter, ArrowUpDown, Lock } from 'lucide-react'
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import apiClient from "@/config/axios"
 
-// Dữ liệu mẫu giả lập
-const MOCK_NFTS = [
-  { id: '1', name: 'Cyber Neon Gorilla', price: '0.45', image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop', seller: '0x7099...79C8', listingId: 1 },
-  { id: '2', name: 'Void Walker #442', price: '1.20', image: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400&h=400&fit=crop', seller: '0x3C44...93BC', listingId: 2 },
-  { id: '3', name: 'Ethereal Forest', price: '0.88', image: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=400&h=400&fit=crop', seller: '0x90F7...b906', listingId: 3 },
-  { id: '4', name: 'Glitch Abstract', price: '0.15', image: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=400&h=400&fit=crop', seller: '0x7099...79C8', listingId: 4 },
-  { id: '5', name: 'Quantum Core', price: '2.50', image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=400&fit=crop', seller: '0x15d3...e12b', listingId: 5 },
-  { id: '6', name: 'Solar Flare', price: '0.99', image: 'https://images.unsplash.com/photo-1635273051731-8933b98c3975?w=400&h=400&fit=crop', seller: '0x71C7...5ad5', listingId: 6 },
-]
+import { Navbar } from "@/components/Navbar"
+import { NFTCard } from "@/components/NFTCard"
+
+import {
+  LayoutGrid,
+  Filter,
+  ArrowUpDown,
+  Lock
+} from "lucide-react"
 
 export default function Home() {
+
   const router = useRouter()
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
-  const [loading, setLoading] = useState<boolean>(true)
+
+  const [items, setItems] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
-    // Check trạng thái đăng nhập từ localStorage
-    const token = localStorage.getItem('accessToken')
-    setIsLoggedIn(!!token)
-    setLoading(false)
+
+    const load = async () => {
+
+      try {
+
+        const token = localStorage.getItem("accessToken")
+        setIsLoggedIn(!!token)
+
+        // API THẬT
+        const data = await apiClient.get("/api/nfts")
+
+        setItems(Array.isArray(data) ? data : [])
+
+      } catch (err) {
+
+        console.error("Load NFTs failed:", err)
+        setItems([])
+
+      } finally {
+
+        setLoading(false)
+
+      }
+    }
+
+    load()
+
   }, [])
-
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken')
-    setIsLoggedIn(false)
-    router.refresh()
-  }
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#04111d] text-white">
-        <p className="text-lg font-semibold animate-pulse">Đang tải dữ liệu hệ thống...</p>
-      </div>
-    )
-  }
 
   return (
     <div className="flex min-h-screen flex-col bg-[#04111d] text-white">
-      {/* Trả Navbar về vị trí tự nhiên, không chèn ép tuyệt đối */}
+
       <Navbar />
 
       <main className="flex-1">
-        {/* Hero Section */}
+
+        {/* HERO */}
         <section className="relative overflow-hidden py-16 px-4 md:px-8 lg:py-24">
+
           <div className="absolute inset-0 -z-10 overflow-hidden">
+
             <div className="absolute -top-24 -left-20 h-96 w-96 rounded-full bg-blue-600/20 blur-[120px]" />
-            <div className="absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-600/10 blur-[160px]" />
+
+            <div className="absolute top-1/2 left-1/2 h-[500px] w-[500px]
+              -translate-x-1/2 -translate-y-1/2 rounded-full
+              bg-purple-600/10 blur-[160px]" />
+
           </div>
 
           <div className="mx-auto max-w-7xl">
+
             <h1 className="mb-6 text-4xl font-black tracking-tight sm:text-6xl lg:text-7xl">
+
               Discover, collect, and sell <br />
+
               <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                 extraordinary NFTs
               </span>
+
             </h1>
+
             <p className="mb-10 max-w-2xl text-lg text-gray-400 md:text-xl">
-              OpenSea is the world&apos;s first and largest web3 marketplace for NFTs and crypto collectibles.
-              Built on Hardhat Local Network.
+              OpenSea style NFT marketplace running on your backend API.
             </p>
 
-            {/* ĐIỀU KIỆN HIỂN THỊ NÚT BẤM TẠI HERO SECTION */}
-            {isLoggedIn ? (
-              // Kịch bản: ĐÃ ĐĂNG NHẬP -> Hiện nút Explore và Create bản gốc của bạn
-              <div className="flex flex-wrap gap-4">
-                <button className="rounded-xl bg-blue-600 px-8 py-4 text-sm font-bold transition-all hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(37,99,235,0.4)]">
-                  Explore Marketplace
-                </button>
-                <button
-                  onClick={() => router.push('/nft/create')}
-                  className="rounded-xl bg-white/10 px-8 py-4 text-sm font-bold backdrop-blur-md transition-all hover:bg-white/20"
-                >
-                  Create NFT
-                </button>
-              </div>
-            ) : (
-              // Kịch bản: CHƯA ĐĂNG NHẬP -> Hiện 2 nút Đăng Nhập & Đăng Ký nổi bật
-              <div className="inline-flex flex-col sm:flex-row gap-4 p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-lg shadow-2xl">
-                <div className="flex flex-col justify-center pr-4">
-                  <p className="text-sm font-bold text-blue-400 uppercase tracking-wider">Trải nghiệm an toàn</p>
-                  <p className="text-xs text-gray-400">Đăng nhập để mở khóa giao dịch bản quyền</p>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => router.push('/login')}
-                    className="rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold transition-all hover:bg-blue-500 active:scale-95"
-                  >
-                    Đăng Nhập
-                  </button>
-                  <button
-                    onClick={() => router.push('/register')}
-                    className="rounded-xl bg-white/10 px-6 py-3.5 text-sm font-bold border border-white/10 transition-all hover:bg-white/20 active:scale-95"
-                  >
-                    Đăng Ký Tài Khoản
-                  </button>
-                </div>
-              </div>
-            )}
+            <div className="flex flex-wrap gap-4">
+
+              <button
+                onClick={() => router.push("/my-nfts")}
+                className="rounded-xl border border-white/20
+                bg-white/5 px-8 py-4 text-sm font-bold
+                backdrop-blur-md transition-all hover:bg-white/10"
+              >
+                Manage NFTs
+              </button>
+
+              <button
+                onClick={() => router.push("/marketplace")}
+                className="rounded-xl bg-blue-600 px-8 py-4 text-sm font-bold
+                transition-all hover:bg-blue-500"
+              >
+                Explore Marketplace
+              </button>
+
+              <button
+                onClick={() => router.push("/nft/create")}
+                className="rounded-xl bg-white/10 px-8 py-4 text-sm font-bold
+                backdrop-blur-md transition-all hover:bg-white/20"
+              >
+                Create NFT
+              </button>
+
+            </div>
           </div>
         </section>
 
-        {/* Marketplace Section */}
+        {/* MARKETPLACE */}
         <section className="relative mx-auto max-w-7xl px-4 py-12 md:px-8">
 
-          {/* HIỆU ỨNG KHÓA MÀN HÌNH NẾU CHƯA ĐĂNG NHẬP */}
           {!isLoggedIn && (
-            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#04111d]/60 backdrop-blur-md transition-all duration-500 rounded-2xl">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/30 text-blue-400 mb-4 animate-bounce">
+
+            <div className="absolute inset-0 z-30 flex flex-col
+              items-center justify-center bg-[#04111d]/60
+              backdrop-blur-md rounded-2xl">
+
+              <div className="flex h-14 w-14 items-center justify-center
+                rounded-full bg-blue-600/20 border border-blue-500/30
+                text-blue-400 mb-4">
+
                 <Lock className="h-6 w-6" />
+
               </div>
-              <h3 className="text-xl font-bold mb-1">Nội dung đã bị khóa bảo mật</h3>
-              <p className="text-sm text-gray-400 mb-6 max-w-sm text-center">
-                Bạn cần đăng nhập hệ thống để xem danh sách và thực hiện mua bán các sản phẩm nghệ thuật kỹ thuật số.
+
+              <h3 className="text-xl font-bold mb-1">
+                Marketplace Locked
+              </h3>
+
+              <p className="text-sm text-gray-400 mb-6 text-center">
+                Login to access NFT marketplace
               </p>
+
               <button
-                onClick={() => router.push('/login')}
-                className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold shadow-lg hover:bg-blue-500 transition-all"
+                onClick={() => router.push("/login")}
+                className="rounded-xl bg-blue-600 px-6 py-3
+                text-sm font-bold hover:bg-blue-500"
               >
-                Đăng Nhập Ngay
+                Login
               </button>
+
             </div>
+
           )}
 
-          {/* Controls */}
-          <div className="mb-8 flex flex-col items-center justify-between gap-4 border-b border-white/5 pb-8 sm:flex-row">
+          {/* CONTROLS */}
+          <div className="mb-8 flex flex-col items-center
+            justify-between gap-4 border-b border-white/5
+            pb-8 sm:flex-row">
+
             <div className="flex items-center gap-4">
-              <div className="flex h-11 items-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-bold">
+
+              <div className="flex h-11 items-center gap-2
+                rounded-xl bg-white/10 px-4 text-sm font-bold">
+
                 <Filter className="h-4 w-4" />
                 Filters
+
               </div>
+
               <div className="text-sm font-semibold text-gray-400">
-                {MOCK_NFTS.length} items
+                {items.length} items
               </div>
+
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="flex h-11 items-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-bold">
+
+              <div className="flex h-11 items-center gap-2
+                rounded-xl bg-white/10 px-4 text-sm font-bold">
+
                 Price: Low to High
+
                 <ArrowUpDown className="h-4 w-4" />
+
               </div>
-              <div className="flex h-11 items-center gap-1 rounded-xl bg-white/10 p-1">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
+
+              <div className="flex h-11 items-center gap-1
+                rounded-xl bg-white/10 p-1">
+
+                <div className="flex h-9 w-9 items-center justify-center
+                  rounded-lg bg-white/10">
+
                   <LayoutGrid className="h-4 w-4" />
+
                 </div>
+
               </div>
+
             </div>
           </div>
 
-          {/* Grid hiển thị danh sách NFT thẻ */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {MOCK_NFTS.map((nft) => (
-              <NFTCard key={nft.id} {...nft} />
-            ))}
-          </div>
+          {/* LOADING */}
+          {loading ? (
+
+            <div className="grid grid-cols-1 gap-6
+              sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+              {[1, 2, 3, 4].map((i) => (
+
+                <div
+                  key={i}
+                  className="h-[340px] rounded-2xl
+                  bg-white/5 animate-pulse"
+                />
+
+              ))}
+
+            </div>
+
+          ) : items.length === 0 ? (
+
+            <div className="rounded-2xl border border-white/10
+              bg-white/5 p-12 text-center">
+
+              <p className="text-gray-400">
+                No NFTs from backend
+              </p>
+
+            </div>
+
+          ) : (
+
+            <div className="grid grid-cols-1 gap-6
+              sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+              {items.map((nft) => (
+
+                <NFTCard
+                  key={nft.id}
+                  {...nft}
+                />
+
+              ))}
+
+            </div>
+
+          )}
+
         </section>
+
       </main>
 
-      {/* Footer */}
-      <footer className="mt-20 border-t border-white/5 bg-[#04111d] py-12 px-4 text-center text-gray-500">
-        <p className="text-sm">© 2026 Antigravity NFT Marketplace. All rights reserved.</p>
-        <p className="mt-2 text-xs">Developed for Hardhat Local Network Demonstration.</p>
+      {/* FOOTER */}
+      <footer className="mt-20 border-t border-white/5
+        bg-[#04111d] py-12 px-4 text-center text-gray-500">
+
+        <p className="text-sm">
+          © 2026 NFT Marketplace
+        </p>
+
       </footer>
+
     </div>
   )
 }
